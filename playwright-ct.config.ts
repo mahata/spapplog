@@ -1,5 +1,4 @@
 import { defineConfig, devices } from '@playwright/experimental-ct-react'
-import viteConfig from './vite.config'
 
 export default defineConfig({
   testDir: './src',
@@ -9,7 +8,6 @@ export default defineConfig({
     ? [['list']]
     : [['list'], ['html', { open: 'never' }]],
   use: {
-    ctViteConfig: viteConfig,
     trace: 'on-first-retry',
   },
   projects: [
