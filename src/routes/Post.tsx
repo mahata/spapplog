@@ -1,24 +1,52 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { remark } from 'remark'
 import html from 'remark-html'
 
-const posts = Object.fromEntries(
+const postLoaders = Object.fromEntries(
   Object.entries(
     import.meta.glob('../../posts/*.md', {
       query: '?raw',
       import: 'default',
-      eager: true,
+      eager: false,
     }),
-  ).map(([path, content]) => {
+  ).map(([path, loader]) => {
     const slug = path.split('/').pop()?.replace(/\.md$/, '') ?? ''
-    return [slug, content as string]
+    return [slug, loader as () => Promise<string>]
   }),
 )
 
 export default function Post() {
   const { slug = '' } = useParams()
-  const markdown = posts[slug]
+  const [markdown, setMarkdown] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [notFound, setNotFound] = useState(false)
+
+  useEffect(() => {
+    const loadPost = async () => {
+      setLoading(true)
+      setNotFound(false)
+      
+      const loader = postLoaders[slug]
+      if (!loader) {
+        setNotFound(true)
+        setLoading(false)
+        return
+      }
+
+      try {
+        const content = await loader()
+        setMarkdown(content)
+      } catch (error) {
+        console.error('Error loading post:', error)
+        setNotFound(true)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadPost()
+  }, [slug])
 
   const renderedHtml = useMemo(() => {
     if (!markdown) return ''
@@ -26,7 +54,11 @@ export default function Post() {
     return String(processed)
   }, [markdown])
 
-  if (!markdown) {
+  if (loading) {
+    return <div>Loading...</div>
+  }
+
+  if (notFound || !markdown) {
     return (
       <div>
         <p>Post not found.</p>
