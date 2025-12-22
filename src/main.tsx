@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
 import Health from './routes/Health.tsx'
+import Post from './routes/Post.tsx'
 
 const router = createBrowserRouter([
   {
@@ -13,6 +14,10 @@ const router = createBrowserRouter([
   {
     path: '/health',
     element: <Health />,
+  },
+  {
+    path: '/posts/:slug',
+    element: <Post />,
   },
 ])
 
