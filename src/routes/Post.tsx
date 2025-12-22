@@ -23,29 +23,44 @@ export default function Post() {
   const [notFound, setNotFound] = useState(false)
 
   useEffect(() => {
+    let isCancelled = false
+
     const loadPost = async () => {
       setLoading(true)
       setNotFound(false)
+      setMarkdown(null)
       
       const loader = postLoaders[slug]
       if (!loader) {
-        setNotFound(true)
-        setLoading(false)
+        if (!isCancelled) {
+          setNotFound(true)
+          setLoading(false)
+        }
         return
       }
 
       try {
         const content = await loader()
-        setMarkdown(content)
+        if (!isCancelled) {
+          setMarkdown(content)
+        }
       } catch (error) {
         console.error('Error loading post:', error)
-        setNotFound(true)
+        if (!isCancelled) {
+          setNotFound(true)
+        }
       } finally {
-        setLoading(false)
+        if (!isCancelled) {
+          setLoading(false)
+        }
       }
     }
 
     loadPost()
+
+    return () => {
+      isCancelled = true
+    }
   }, [slug])
 
   const renderedHtml = useMemo(() => {
