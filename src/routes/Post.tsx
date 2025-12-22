@@ -3,14 +3,21 @@ import { Link, useParams } from 'react-router-dom'
 import { remark } from 'remark'
 import html from 'remark-html'
 
-const posts = import.meta.glob<string>('/posts/*.md', {
-  as: 'raw',
-  eager: true,
-})
+const posts = Object.fromEntries(
+  Object.entries(
+    import.meta.glob<string>('../../posts/*.md', {
+      as: 'raw',
+      eager: true,
+    }),
+  ).map(([path, content]) => {
+    const slug = path.split('/').pop()?.replace(/\.md$/, '') ?? ''
+    return [slug, content]
+  }),
+)
 
 export default function Post() {
   const { slug = '' } = useParams()
-  const markdown = posts[`/posts/${slug}.md`]
+  const markdown = posts[slug]
 
   const renderedHtml = useMemo(() => {
     if (!markdown) return ''
