@@ -24,6 +24,14 @@ test('renders existing markdown post', async ({ mount }) => {
   await expect(component).toContainText('Yo.')
 })
 
+test('renders markdown with front matter', async ({ mount }) => {
+  const component = await mountAtPath(mount, '/posts/front-matter', 'posts-test')
+
+  await expect(component).toBeVisible()
+  await expect(component).toContainText('heyheyheyhey.')
+  await expect(component).not.toContainText('titletitletitle')
+})
+
 test('shows not found for missing post', async ({ mount }) => {
   const component = await mountAtPath(mount, '/posts/missing', 'posts')
 
