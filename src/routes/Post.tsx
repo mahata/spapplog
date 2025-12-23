@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { remark } from 'remark'
 import html from 'remark-html'
+import frontmatter from 'remark-frontmatter'
 
 type PostProps = Readonly<{
   baseDir?: 'posts' | 'posts-test'
@@ -59,7 +60,10 @@ export default function Post({ baseDir = 'posts' }: PostProps) {
   const renderedHtml = useMemo(() => {
     if (markdown === undefined || markdown === null) return ''
     try {
-      const processed = remark().use(html).processSync(markdown)
+      const processed = remark()
+        .use(frontmatter)
+        .use(html)
+        .processSync(markdown)
       return String(processed)
     } catch (error) {
       console.error('Error processing markdown:', error)
