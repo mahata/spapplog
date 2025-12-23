@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/experimental-ct-react'
 import type { ComponentFixtures } from '@playwright/experimental-ct-react'
 import { MemoryRouter } from 'react-router-dom'
-import App from './App'
+import App from '@/App'
 
 const mountApp = async (mount: ComponentFixtures['mount']) => {
   return await mount(
