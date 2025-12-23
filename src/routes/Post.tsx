@@ -1,27 +1,50 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { remark } from 'remark'
 import html from 'remark-html'
 
-const posts = Object.fromEntries(
-  Object.entries(
-    import.meta.glob('../../posts/*.md', {
-      query: '?raw',
-      import: 'default',
-      eager: true,
-    }),
-  ).map(([path, content]) => {
-    const slug = path.split('/').pop()?.replace(/\.md$/, '') ?? ''
-    return [slug, content as string]
-  }),
-)
+const posts = import.meta.glob('../../posts/*.md', {
+  query: '?raw',
+  import: 'default',
+})
 
 export default function Post() {
   const { slug = '' } = useParams()
-  const markdown = posts[slug]
+  const [markdown, setMarkdown] = useState<string | null | undefined>(undefined)
+  const [loadedSlug, setLoadedSlug] = useState('')
+
+  useEffect(() => {
+    const postPath = `../../posts/${slug}.md`
+    const loadPost = posts[postPath]
+
+    let isCancelled = false
+
+    const loadContent = async () => {
+      if (!loadPost) {
+        return null
+      }
+      try {
+        return await loadPost() as string
+      } catch (error) {
+        console.error('Error loading post:', error)
+        return null
+      }
+    }
+
+    loadContent().then((content) => {
+      if (!isCancelled) {
+        setMarkdown(content)
+        setLoadedSlug(slug)
+      }
+    })
+
+    return () => {
+      isCancelled = true
+    }
+  }, [slug])
 
   const renderedHtml = useMemo(() => {
-    if (markdown === undefined) return ''
+    if (markdown === undefined || markdown === null) return ''
     try {
       const processed = remark().use(html).processSync(markdown)
       return String(processed)
@@ -31,7 +54,14 @@ export default function Post() {
     }
   }, [markdown])
 
-  if (markdown === undefined) {
+  // Derive loading state from whether we've loaded the current slug
+  const isLoading = loadedSlug !== slug
+
+  if (isLoading) {
+    return <p>Loading...</p>
+  }
+
+  if (markdown === null) {
     return (
       <div>
         <p>Post not found.</p>
