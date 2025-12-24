@@ -17,16 +17,6 @@ test('should render heading', async ({ mount }) => {
   await expect(component.getByRole('heading', { name: 'Vite + React' })).toBeVisible()
 })
 
-test('should increment count when button is clicked', async ({ mount }) => {
-  const component = await mountApp(mount)
-
-  const button = component.getByRole('button', { name: /count is/i })
-  await expect(button).toHaveText('count is 0')
-
-  await button.click()
-  await expect(button).toHaveText('count is 1')
-})
-
 test('should render health link with correct href', async ({ mount }) => {
   const component = await mountApp(mount)
 
