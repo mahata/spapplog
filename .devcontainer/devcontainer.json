@@ -6,4 +6,5 @@
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
 
+  "postCreateCommand": "pnpm install"
 }
